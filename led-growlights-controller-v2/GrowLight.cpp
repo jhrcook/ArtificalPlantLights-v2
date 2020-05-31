@@ -25,6 +25,7 @@ void GrowLight::updateLights(int current_hour) {
             switchLightsOnOff(true);
         } else if ((current_hour < onHour | offHour <= current_hour) && lightStatus) {
             switchLightsOnOff(false);
+            
         }
     }
 }
@@ -43,6 +44,8 @@ void GrowLight::switchLightsOnOff(bool state) {
 // switch to override status
 void GrowLight::overrideLights(int current_hour) {
     overrideStatus = !overrideStatus;
+    Serial.print("override status: ");
+    Serial.println(overrideStatus);
     if (overrideStatus) {
         switchLightsOnOff(!lightStatus);
     } else {
