@@ -7,25 +7,25 @@
 RTC_DS3231 rtc;
 
 // Johannesburg, South Africa (in Northern hemisphere)
-#define SA_LAT 26.195246
-#define SA_LONG 28.034088
-#define SA_TZ 120
+#define SA_LAT    26.195246
+#define SA_LONG   28.034088
+#define SA_TZ     120
 
 // Joshua Tree National Park, California, USA
-#define JT_LAT 33.881866
-#define JT_LONG -115.900650
-#define JT_TZ -420
+#define JT_LAT    33.881866
+#define JT_LONG  -115.900650
+#define JT_TZ    -420
 
 // Los Angeles, California, USA
-#define LA_LAT 34.052235
-#define LA_LONG -118.243683
-#define LA_TZ -420
+#define LA_LAT    34.052235
+#define LA_LONG  -118.243683
+#define LA_TZ    -420
 
 
 // IO pins
 int relayOne = 10;
 int relayTwo = 11;
-int relayThree= 12;
+int relayThree = 12;
 int buttonOne = 2;
 int buttonTwo = 3;
 int buttonThree = 4;
@@ -37,17 +37,16 @@ sunGrowLight lightThree(relayThree, LA_LAT, LA_LONG, LA_TZ);
 
 void setup() {
 
-//    Serial.begin(9600);
-//    Serial.print("Setting up... ");
+    Serial.begin(9600);
+    Serial.print("Setting up... ");
     
     pinMode(LED_BUILTIN, OUTPUT);
     
     // begin RTC
     rtc.begin();
     
-    if (true) {
+    if (false) {
         Serial.println("Reseting RTC time and date.");
-        // following line sets the RTC to the date & time this sketch was compiled
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
     
@@ -59,18 +58,15 @@ void setup() {
     // pause before starting to control the lights
     delay(3000);
 
-//    Serial.println("done.");
+    Serial.println("done.");
 }
 
 void loop() {
     // Retrieve the current time.
     DateTime now_dt = rtc.now();
 
-//    Serial.print("Current date time: ");
-//    Serial.println(now_dt.year());
-//    Serial.print("Current unixtime date time: ");
-//    printDate(now_dt.unixtime());
-//    Serial.println("");
+    // A function to help with troubleshooting.
+    printSunriseSunsetDateTimes(now_dt);
     
     // Check the current time against the time limits
     lightOne.updateLights(now_dt.unixtime());
@@ -95,6 +91,7 @@ void loop() {
         delay(50);
         end_timer = millis();
     }
+    
 //    Serial.println("(end of cycle)");
 }
 
@@ -107,4 +104,37 @@ int checkButtonForLight(int button, sunGrowLight *gl, DateTime now_dt) {
             gl->overrideLights(now_dt.unixtime());
         }
     return buttonState;
+}
+
+
+void printDate(time_t date) {
+    char buff[20];
+    sprintf(buff, "%2d-%02d-%4d %02d:%02d:%02d",
+    day(date), month(date), year(date), hour(date), minute(date), second(date));
+    Serial.print(buff);
+}
+
+
+void printSunriseSunsetDateTimes(DateTime now_dt) {
+    Serial.print("Current date time: ");
+    Serial.println(now_dt.year());
+    Serial.print("Current unixtime date time: ");
+    printDate(now_dt.unixtime());
+    Serial.println("");
+
+    Serial.print("SA sunrise, sunset: ");
+    printDate(lightOne.getSunriseDate(now_dt.unixtime()));
+    Serial.print(", ");
+    printDate(lightOne.getSunsetDate(now_dt.unixtime()));
+    Serial.println("");
+    Serial.print("JT sunrise, sunset: ");
+    printDate(lightTwo.getSunriseDate(now_dt.unixtime()));
+    Serial.print(", ");
+    printDate(lightTwo.getSunsetDate(now_dt.unixtime()));
+    Serial.println("");
+    Serial.print("LA sunrise, sunset: ");
+    printDate(lightThree.getSunriseDate(now_dt.unixtime()));
+    Serial.print(", ");
+    printDate(lightThree.getSunsetDate(now_dt.unixtime()));
+    Serial.println("\n");
 }
